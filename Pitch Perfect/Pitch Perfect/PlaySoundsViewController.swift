@@ -2,93 +2,62 @@
 //  PlaySoundsViewController.swift
 //  Pitch Perfect
 //
-//  Created by Shruti Pawar on 06/03/15.
-//  Copyright (c) 2015 ShapeMyApp Software Solutions Pvt. Ltd. All rights reserved.
+//  Created by shruti choksi on 20/10/17.
 //
 
 import UIKit
 import AVFoundation
 
+
 class PlaySoundsViewController: UIViewController {
+
+    @IBOutlet weak var slowButton: UIButton!
+    @IBOutlet weak var fastButton: UIButton!
+    @IBOutlet weak var highPitchButton: UIButton!
+    @IBOutlet weak var lowPitchButton: UIButton!
+    @IBOutlet weak var echoButton: UIButton!
+    @IBOutlet weak var reverbButton: UIButton!
+    @IBOutlet weak var stopButton: UIButton!
     
-    var player : AVAudioPlayer!
-    var receivedAudio:RecordedAudio!
-    var audioEngine: AVAudioEngine!
+    var recordedAudioURL: URL!
     var audioFile:AVAudioFile!
+    var audioEngine:AVAudioEngine!
+    var audioPlayerNode: AVAudioPlayerNode!
+    var stopTimer: Timer!
     
+    enum ButtonType: Int {
+        case slow = 0, fast, chipmunk, vader, echo, reverb
+    }
     override func viewDidLoad() {
         super.viewDidLoad()
-        player = AVAudioPlayer(contentsOfURL: receivedAudio.filePathUrl, error: nil)
-        player.enableRate = true
-        audioEngine = AVAudioEngine()
-        audioFile = AVAudioFile(forReading: receivedAudio.filePathUrl, error: nil)
+        setupAudio()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        configureUI(.notPlaying)
+    }
+    
+    @IBAction func playSound(_ sender: UIButton) {
+        switch(ButtonType(rawValue: sender.tag)!) {
+        case .slow:
+            playSound(rate: 0.5)
+        case .fast:
+            playSound(rate: 1.5)
+        case .chipmunk:
+            playSound(pitch: 1000)
+        case .vader:
+            playSound(pitch: -1000)
+        case .echo:
+            playSound(echo: true)
+        case .reverb:
+            playSound(reverb: true)
+        }
         
-    }
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-    }
-    @IBAction func playSlowSound(sender: UIButton) {
-        playSoundAtDifferentrate(audioPlayerRate: 0.5)
+        configureUI(.playing)
     }
     
-    @IBAction func playFastSound(sender: UIButton) {
-        playSoundAtDifferentrate(audioPlayerRate: 2.0)
-    }
-
-    
-    @IBAction func stopAudio(sender: UIButton) {
+    @IBAction func stopSound(_ sender: UIButton) {
        stopAudio()
-    }
-    
-    @IBAction func playRecordInChipmunkVoice(sender: UIButton) {
-        let changePitchEffect = AVAudioUnitTimePitch()
-        changePitchEffect.pitch = 1000
-        playSoundEffects(soundEffectAudioUnit: changePitchEffect)
-    }
-    
-    @IBAction func playRecordInDarthVaderVoice(sender: UIButton) {
-        let changePitchEffect = AVAudioUnitTimePitch()
-        changePitchEffect.pitch = -1000
-        playSoundEffects(soundEffectAudioUnit: changePitchEffect)
-    }
-    
-    @IBAction func playRecordWithReverbEffect(sender: UIButton) {
-        let reverbEffect = AVAudioUnitReverb()
-        reverbEffect.wetDryMix = 100
-        reverbEffect.loadFactoryPreset(AVAudioUnitReverbPreset.LargeHall)
-        playSoundEffects(soundEffectAudioUnit: reverbEffect)
-        
-    }
-    @IBAction func playRecordWithEchoEffect(sender: UIButton) {
-        let distortion = AVAudioUnitDistortion()
-        distortion.loadFactoryPreset(AVAudioUnitDistortionPreset.MultiEcho2)
-        distortion.preGain = 6
-        playSoundEffects(soundEffectAudioUnit: distortion)
-    }
-    
-    func stopAudio() {
-        player.stop()
-        audioEngine.stop()
-    }
-    func playSoundAtDifferentrate(audioPlayerRate rate:Float) {
-        stopAudio()
-        player.rate = rate
-        player.currentTime = 0.0
-        player.play()
-    }
-    func playSoundEffects(soundEffectAudioUnit avAudioUnit: AVAudioUnit) {
-        stopAudio()
-        audioEngine.reset()
-        
-        var audioPlayerNode = AVAudioPlayerNode()
-        audioEngine.attachNode(audioPlayerNode)
-        audioEngine.attachNode(avAudioUnit)
-        
-        audioEngine.connect(audioPlayerNode, to: avAudioUnit, format: nil)
-        audioEngine.connect(avAudioUnit, to: audioEngine.outputNode, format: nil)
-        
-        audioPlayerNode.scheduleFile(audioFile, atTime: nil, completionHandler: nil)
-        audioEngine.startAndReturnError(nil)
-        audioPlayerNode.play()
     }
 }

@@ -2,17 +2,16 @@
 //  RecordedAudio.swift
 //  Pitch Perfect
 //
-//  Created by Shruti Pawar on 06/03/15.
-//  Copyright (c) 2015 ShapeMyApp Software Solutions Pvt. Ltd. All rights reserved.
+//  Created by shruti choksi on 20/10/17.
 //
 
 import UIKit
 
 class RecordedAudio: NSObject {
-    var filePathUrl : NSURL!
-    var title: String!
     
-    init(filePathUrl : NSURL!, title: String!) {
+    var filePathUrl : URL!
+    var title: String!
+    init(filePathUrl : URL!, title: String!) {
         self.filePathUrl = filePathUrl
         self.title = title
     }
